@@ -17,12 +17,14 @@
 #define E2E_P02_MAXCOUNTER 0x0F /* TODO: Look for the document from Calin */
 #define E2E_INITIAL_CRC 0xFFU   /* TODO: Ask to Conti */
 #define E2E_REAR_RADAR_MESSAGE_LIST_SIZE 24
+#define E2E_FRONT_RADAR_MESSAGE_LIST_SIZE 13
 
 /* Test Definitions */
 #define TEST_CAN_MESSAGE_SIZE 8U
 #define TEST_COUNTER_INIT_VAL 9U
 #define TEST_CRC_VAL 31U
 #define TEST_MESSAGE_ID 0x18FFB69C
+#define TEST_RADAR_POSITION en_RadarFront
 
 /**
  * @brief General purpose, simple bitfield
@@ -75,6 +77,16 @@ typedef enum
 } ten_E2E_MessageType;
 
 /**
+ * @brief CanBus message receive/transfer type
+ * 
+ */
+typedef enum
+{
+    en_RadarFront= 0,
+    en_RadarRear
+} ten_RadarPosition;
+
+/**
  * @brief CanBus message struct
  * 
  */
@@ -109,19 +121,33 @@ typedef struct
 } t_E2E_ListMember;
 
 /**
+ * @brief Current position of the radar on the car
+ * 
+ */
+extern ten_RadarPosition enRadarPosition;
+
+/**
  * @brief Rear radar E2E message list
  * 
  */
 extern t_E2E_ListMember u32MessageListRear[E2E_REAR_RADAR_MESSAGE_LIST_SIZE];
 
 /**
+ * @brief Front radar E2E message list
+ * 
+ */
+extern t_E2E_ListMember u32MessageListFront[E2E_FRONT_RADAR_MESSAGE_LIST_SIZE];
+
+/**
  * @brief E2E message integrity checking funciton
  * 
  * @param pinout_canMessage CanBus message to be checked
  * @param pin_u32MessageListRear Rear radar E2E message list
+ * @param pin_u32MessageListFront Front radar E2E message list
+ * @param pin_enRadarPosition Radar position on the car
  * @return ten_E2E_ReturnStatus E2E integrity status
  */
-ten_E2E_ReturnStatus E2E_ReceiveCheck(t_E2E_CanMessage *pinout_canMessage, t_E2E_ListMember pin_u32MessageListRear[]);
+ten_E2E_ReturnStatus E2E_ReceiveCheck(t_E2E_CanMessage *pinout_canMessage, t_E2E_ListMember pin_u32MessageListRear[], t_E2E_ListMember pin_u32MessageListFront[], ten_RadarPosition pin_enRadarPosition);
 
 /**
  * @brief Creates bitmask for selected size
@@ -136,18 +162,22 @@ uint8_t GetBitmask(uint8_t size);
  * 
  * @param pin_canMessage CanBus message to be searched
  * @param pin_u32MessageListRear Rear radar E2E message list
+ * @param pin_u32MessageListFront Front radar E2E message list
+ * @param pin_enRadarPosition Radar position on the car
  * @return t_E2E_IntegrityInfo CRC8 information
  */
-t_E2E_IntegrityInfo E2E_GetCrc8Info(t_E2E_CanMessage pin_canMessage, t_E2E_ListMember pin_u32MessageListRear[]);
+t_E2E_IntegrityInfo E2E_GetCrc8Info(t_E2E_CanMessage pin_canMessage, t_E2E_ListMember pin_u32MessageListRear[], t_E2E_ListMember pin_u32MessageListFront[], ten_RadarPosition pin_enRadarPosition);
 
 /**
  * @brief Gets the message counter info from the list for selected CanBus message
  * 
  * @param pin_canMessage CanBus message to be searched
  * @param pin_u32MessageListRear Rear radar E2E message list
+ * @param pin_u32MessageListFront Front radar E2E message list
+ * @param pin_enRadarPosition Radar position on the car
  * @return t_E2E_IntegrityInfo Message counter information
  */
-t_E2E_IntegrityInfo E2E_GetCounterInfo(t_E2E_CanMessage pin_canMessage, t_E2E_ListMember pin_u32MessageListRear[]);
+t_E2E_IntegrityInfo E2E_GetCounterInfo(t_E2E_CanMessage pin_canMessage, t_E2E_ListMember pin_u32MessageListRear[], t_E2E_ListMember pin_u32MessageListFront[], ten_RadarPosition pin_enRadarPosition);
 
 /**
  * @brief Dummy function that simulates calculation of CRC8

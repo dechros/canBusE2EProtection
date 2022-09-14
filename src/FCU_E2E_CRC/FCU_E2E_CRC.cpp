@@ -36,7 +36,21 @@ t_E2E_ListMember u32MessageListRear[E2E_REAR_RADAR_MESSAGE_LIST_SIZE] = {{0x18FF
                                                                          {0x18FFAC17, en_E2E_Message_Rx, {0, 8}, {8, 4}},
                                                                          {0x18F0010B, en_E2E_Message_Rx, {32, 8}, {28, 4}}};
 
-ten_E2E_ReturnStatus E2E_ReceiveCheck(t_E2E_CanMessage *pinout_canMessage, t_E2E_ListMember pin_u32MessageListRear[])
+t_E2E_ListMember u32MessageListFront[E2E_FRONT_RADAR_MESSAGE_LIST_SIZE] = {{0x18FFAC9E, en_E2E_Message_Rx, {0, 8}, {8, 4}},
+                                                                           {0xCFBF30B, en_E2E_Message_Rx, {48, 8}, {56, 4}},
+                                                                           {0x18FEBF0B, en_E2E_Message_Rx, {56, 8}, {52, 4}},
+                                                                           {0x18FFA30B, en_E2E_Message_Rx, {0, 8}, {8, 4}},
+                                                                           {0x18FF980B, en_E2E_Message_Rx, {0, 8}, {8, 4}},
+                                                                           {0xCFF9D00, en_E2E_Message_Rx, {56, 8}, {52, 4}},
+                                                                           {0xCFF1200, en_E2E_Message_Rx, {56, 8}, {4, 4}},
+                                                                           {0x18FFAF03, en_E2E_Message_Rx, {56, 8}, {52, 4}},
+                                                                           {0xCFFC613, en_E2E_Message_Rx, {0, 8}, {8, 4}},
+                                                                           {0x19FF7321, en_E2E_Message_Rx, {0, 8}, {8, 4}},
+                                                                           {0xCFFD221, en_E2E_Message_Rx, {48, 8}, {56, 4}},
+                                                                           {0x63140C9, en_E2E_Message_Rx, {56, 8}, {52, 4}},
+                                                                           {0x18FFAC17, en_E2E_Message_Rx, {0, 8}, {8, 4}}};
+
+ten_E2E_ReturnStatus E2E_ReceiveCheck(t_E2E_CanMessage *pinout_canMessage, t_E2E_ListMember pin_u32MessageListRear[], t_E2E_ListMember pin_u32MessageListFront[], ten_RadarPosition pin_enRadarPosition)
 {
     ten_E2E_ReturnStatus l_enRetVal = en_E2E_Unknown;
     if ((pinout_canMessage == NULL) || (pinout_canMessage->ptrMessage == NULL) || (pinout_canMessage->ptrSize == NULL) || (pinout_canMessage->ptrCurrentCounter == NULL) || (pinout_canMessage->u32DataID == NULL))
@@ -47,8 +61,8 @@ ten_E2E_ReturnStatus E2E_ReceiveCheck(t_E2E_CanMessage *pinout_canMessage, t_E2E
     {
         uint8_t l_u8DeltaCounter = 0;
         uint8_t l_counter = 0;
-        t_E2E_IntegrityInfo l_crcInfo = E2E_GetCrc8Info(*pinout_canMessage, u32MessageListRear);
-        t_E2E_IntegrityInfo l_counterInfo = E2E_GetCounterInfo(*pinout_canMessage, u32MessageListRear);
+        t_E2E_IntegrityInfo l_crcInfo = E2E_GetCrc8Info(*pinout_canMessage, u32MessageListRear, u32MessageListFront, pin_enRadarPosition);
+        t_E2E_IntegrityInfo l_counterInfo = E2E_GetCounterInfo(*pinout_canMessage, u32MessageListRear, u32MessageListFront, pin_enRadarPosition);
 
         if (l_crcInfo.size > 8 || l_counterInfo.size > 8)
         {
@@ -124,35 +138,65 @@ uint8_t GetBitmask(uint8_t size)
     return l_u8Bitmask;
 }
 
-t_E2E_IntegrityInfo E2E_GetCrc8Info(t_E2E_CanMessage pin_canMessage, t_E2E_ListMember pin_u32MessageListRear[])
+t_E2E_IntegrityInfo E2E_GetCrc8Info(t_E2E_CanMessage pin_canMessage, t_E2E_ListMember pin_u32MessageListRear[], t_E2E_ListMember pin_u32MessageListFront[], ten_RadarPosition pin_enRadarPosition)
 {
     t_E2E_IntegrityInfo crc;
     crc.pos = 255;
     crc.size = 255;
-    for (int i = 0; i < E2E_REAR_RADAR_MESSAGE_LIST_SIZE; i++)
+    if (pin_enRadarPosition == en_RadarRear)
     {
-        if (*pin_canMessage.u32DataID == pin_u32MessageListRear[i].u32MessageId)
+        for (int i = 0; i < E2E_REAR_RADAR_MESSAGE_LIST_SIZE; i++)
         {
-            crc.pos = pin_u32MessageListRear[i].crc.pos;
-            crc.size = pin_u32MessageListRear[i].crc.size;
-            break;
+            if (*pin_canMessage.u32DataID == pin_u32MessageListRear[i].u32MessageId)
+            {
+                crc.pos = pin_u32MessageListRear[i].crc.pos;
+                crc.size = pin_u32MessageListRear[i].crc.size;
+                break;
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < E2E_FRONT_RADAR_MESSAGE_LIST_SIZE; i++)
+        {
+            if (*pin_canMessage.u32DataID == pin_u32MessageListFront[i].u32MessageId)
+            {
+                crc.pos = pin_u32MessageListFront[i].crc.pos;
+                crc.size = pin_u32MessageListFront[i].crc.size;
+                break;
+            }
         }
     }
     return crc;
 }
 
-t_E2E_IntegrityInfo E2E_GetCounterInfo(t_E2E_CanMessage pin_canMessage, t_E2E_ListMember pin_u32MessageListRear[])
+t_E2E_IntegrityInfo E2E_GetCounterInfo(t_E2E_CanMessage pin_canMessage, t_E2E_ListMember pin_u32MessageListRear[], t_E2E_ListMember pin_u32MessageListFront[], ten_RadarPosition pin_enRadarPosition)
 {
     t_E2E_IntegrityInfo counter;
     counter.pos = 255;
     counter.size = 255;
-    for (int i = 0; i < E2E_REAR_RADAR_MESSAGE_LIST_SIZE; i++)
+    if (pin_enRadarPosition == en_RadarRear)
     {
-        if (*pin_canMessage.u32DataID == pin_u32MessageListRear[i].u32MessageId)
+        for (int i = 0; i < E2E_REAR_RADAR_MESSAGE_LIST_SIZE; i++)
         {
-            counter.pos = pin_u32MessageListRear[i].counter.pos;
-            counter.size = pin_u32MessageListRear[i].counter.size;
-            break;
+            if (*pin_canMessage.u32DataID == pin_u32MessageListRear[i].u32MessageId)
+            {
+                counter.pos = pin_u32MessageListRear[i].counter.pos;
+                counter.size = pin_u32MessageListRear[i].counter.size;
+                break;
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < E2E_FRONT_RADAR_MESSAGE_LIST_SIZE; i++)
+        {
+            if (*pin_canMessage.u32DataID == pin_u32MessageListFront[i].u32MessageId)
+            {
+                counter.pos = pin_u32MessageListFront[i].counter.pos;
+                counter.size = pin_u32MessageListFront[i].counter.size;
+                break;
+            }
         }
     }
     return counter;

@@ -1,7 +1,7 @@
 /**
  * @file main.cpp
  * @author Halit Cetin (halit.cetin@alten.com)
- * @brief E2E CanBus Concept Project
+ * @brief CanBus E2E Concept Project
  * @version 0.1
  * @date 2022-09-13
  *
@@ -15,11 +15,6 @@
 void setup()
 {
     Serial.begin(9600);
-    delay(500);
-}
-
-void loop()
-{
     t_E2E_CanMessage testMessage;
     testMessage.ptrMessage = new uint8_t[TEST_CAN_MESSAGE_SIZE];
     testMessage.ptrSize = new uint32_t[1];
@@ -44,10 +39,15 @@ void loop()
     *testMessage.ptrSize = TEST_CAN_MESSAGE_SIZE;
     *testMessage.ptrCurrentCounter = TEST_COUNTER_INIT_VAL;
     *testMessage.u32DataID = TEST_MESSAGE_ID;
-    Serial.println(E2E_ReceiveCheck(&testMessage, u32MessageListRear));
+    ten_E2E_ReturnStatus testResult = E2E_ReceiveCheck(&testMessage, u32MessageListRear, u32MessageListFront, TEST_RADAR_POSITION);
+    Serial.println("E2E Result : " + String(testResult));
     delete testMessage.ptrMessage;
     delete testMessage.ptrSize;
     delete testMessage.ptrCurrentCounter;
     delete testMessage.u32DataID;
-    delay(__WINT_MAX__);
+}
+
+void loop()
+{
+    return;
 }
