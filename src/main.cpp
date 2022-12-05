@@ -1,6 +1,6 @@
 /**
  * @file main.cpp
- * @author Halit Cetin (halit.cetin@alten.com)
+ * @author Halit Cetin (halitcetin@live.com)
  * @brief CanBus E2E Concept Project
  * @version 0.1
  * @date 2022-09-13

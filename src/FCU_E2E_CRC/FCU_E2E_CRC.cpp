@@ -1,6 +1,6 @@
 /**
  * @file FCU_E2E_CRC.cpp
- * @author Halit Cetin (halit.cetin@alten.com)
+ * @author Halit Cetin (halitcetin@live.com)
  * @brief Canbus E2E Control File
  * @version 0.1
  * @date 2022-09-14

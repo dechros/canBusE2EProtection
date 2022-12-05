@@ -1,6 +1,6 @@
 /**
  * @file FCU_E2E_CRC.h
- * @author Halit Cetin (halit.cetin@alten.com)
+ * @author Halit Cetin (halitcetin@live.com)
  * @brief Canbus E2E Control Header File
  * @version 0.1
  * @date 2022-09-14
@@ -14,8 +14,8 @@
 #ifndef FCU_E2E_CRC_H
 #define FCU_E2E_CRC_H
 
-#define E2E_P02_MAXCOUNTER 0x0F /* TODO: Look for the document from Calin */
-#define E2E_INITIAL_CRC 0xFFU   /* TODO: Ask to Conti */
+#define E2E_P02_MAXCOUNTER 0x0F
+#define E2E_INITIAL_CRC 0xFFU
 #define E2E_REAR_RADAR_MESSAGE_LIST_SIZE 24
 #define E2E_FRONT_RADAR_MESSAGE_LIST_SIZE 13
 
